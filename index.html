@@ -1,0 +1,333 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obstetrics EDD Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="month"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        input[type="month"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-rose-50 to-teal-50 min-h-screen flex items-center justify-center p-4 sm:p-6 text-slate-800">
+
+    <!-- Main Container: Now uses grid for side-by-side on md+ screens -->
+    <main class="w-full max-w-4xl bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl shadow-rose-100/50 border border-white overflow-hidden grid grid-cols-1 md:grid-cols-2">
+        
+        <!-- LEFT PANEL: Inputs -->
+        <div class="border-b md:border-b-0 md:border-r border-rose-100 flex flex-col bg-white">
+            <!-- Header -->
+            <header class="px-6 py-5 border-b border-rose-50 flex items-center gap-3">
+                <div class="bg-rose-100 text-rose-600 p-2.5 rounded-2xl">
+                    <i data-lucide="baby" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-800 leading-tight">EDD Calculator</h1>
+                    <p class="text-xs text-slate-500 font-medium">Obstetrics & Gynecology (Lite)</p>
+                </div>
+            </header>
+
+            <!-- Input Form -->
+            <div class="p-6 space-y-6 flex-1">
+                
+                <!-- Input Type Toggle -->
+                <div class="bg-slate-100 p-1 rounded-xl flex items-center text-sm font-semibold">
+                    <button id="btn-exact" onclick="setMode('exact')" class="flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-slate-800 transition-all">
+                        Exact Date
+                    </button>
+                    <button id="btn-month" onclick="setMode('month')" class="flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-700 transition-all">
+                        Month Only
+                    </button>
+                </div>
+
+                <!-- LMP Input (Exact Date) -->
+                <div id="wrapper-exact" class="space-y-2 block">
+                    <label for="lmp" class="block text-sm font-semibold text-slate-700">
+                        First day of Last Menstrual Period
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i data-lucide="calendar-days" class="w-5 h-5 text-slate-400"></i>
+                        </div>
+                        <input type="date" id="lmp" onchange="calculateEDD()"
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:bg-white transition-all outline-none">
+                    </div>
+                </div>
+
+                <!-- LMP Input (Month & Year Only) -->
+                <div id="wrapper-month" class="space-y-2 hidden">
+                    <label for="lmp-month" class="block text-sm font-semibold text-slate-700">
+                        Month and Year of LMP
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i data-lucide="calendar" class="w-5 h-5 text-slate-400"></i>
+                        </div>
+                        <input type="month" id="lmp-month" onchange="calculateEDD()"
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:bg-white transition-all outline-none">
+                    </div>
+                    <p class="text-xs text-amber-600 bg-amber-50 p-2 rounded-lg mt-2 flex gap-1.5 items-start">
+                        <i data-lucide="info" class="w-3.5 h-3.5 shrink-0 mt-0.5"></i>
+                        Calculation assumes the 15th of the selected month.
+                    </p>
+                </div>
+
+                <!-- Cycle Length Input -->
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <label for="cycle" class="block text-sm font-semibold text-slate-700">
+                            Average Cycle Length
+                        </label>
+                        <span class="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-1 rounded-md">Days</span>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <i data-lucide="rotate-cw" class="w-5 h-5 text-slate-400"></i>
+                        </div>
+                        <input type="number" id="cycle" value="28" min="20" max="45" oninput="calculateEDD()"
+                            class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500 focus:bg-white transition-all outline-none">
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <p id="error-msg" class="text-sm text-red-500 hidden font-medium flex items-center gap-1.5">
+                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                    <span id="error-text"></span>
+                </p>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Results -->
+        <div class="p-6 bg-slate-50/50 flex flex-col justify-center min-h-[300px]">
+            
+            <!-- Empty State (Shown before input) -->
+            <div id="empty-state" class="text-center space-y-3 opacity-60">
+                <i data-lucide="calendar-heart" class="w-12 h-12 text-rose-300 mx-auto"></i>
+                <p class="text-sm font-medium text-slate-500">Enter LMP details to view<br>estimated dates and gestation.</p>
+            </div>
+
+            <!-- Populated State (Shown after valid input) -->
+            <div id="result-state" class="hidden space-y-8 w-full max-w-sm mx-auto">
+                
+                <!-- EDD Result -->
+                <div class="text-center space-y-1 fade-in" style="animation-delay: 0.1s;">
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Estimated Date of Delivery</p>
+                    <h2 id="res-edd" class="text-4xl sm:text-3xl lg:text-4xl font-bold text-rose-600 tracking-tight py-2">--</h2>
+                    <p id="approx-warning" class="text-xs text-amber-600 font-medium hidden bg-amber-100/50 py-1 px-3 rounded-full inline-block">
+                        *Approximate EDD (USG needed)
+                    </p>
+                </div>
+
+                <!-- POG & Trimester Cards -->
+                <div class="grid grid-cols-2 gap-4 fade-in" style="animation-delay: 0.2s;">
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-2 text-slate-500 mb-2">
+                            <i data-lucide="activity" class="w-4 h-4 text-teal-500"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wide">Current POG</span>
+                        </div>
+                        <p id="res-pog" class="text-xl font-bold text-slate-800 leading-tight">--</p>
+                        <p class="text-[11px] text-slate-400 mt-1 font-medium">Gestational Age</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex items-center gap-2 text-slate-500 mb-2">
+                            <i data-lucide="pie-chart" class="w-4 h-4 text-rose-400"></i>
+                            <span class="text-[11px] font-bold uppercase tracking-wide">Trimester</span>
+                        </div>
+                        <p id="res-trimester" class="text-xl font-bold text-slate-800 leading-tight">--</p>
+                        <p id="res-trimester-desc" class="text-[11px] text-slate-400 mt-1 font-medium">--</p>
+                    </div>
+                </div>
+
+                <!-- Standard Naegele's Rule Info -->
+                <div class="bg-blue-50 text-blue-700 p-3 rounded-xl text-xs flex items-start gap-2 fade-in" style="animation-delay: 0.3s;">
+                    <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5 opacity-70"></i>
+                    <p>Based on Naegele's rule, adjusted for a <span id="res-cycle-len" class="font-bold">28</span>-day cycle. Dates formatted for Indian clinical standard.</p>
+                </div>
+
+            </div>
+        </div>
+        
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        let inputMode = 'exact';
+
+        // Set max dates to prevent future selection
+        const todayStr = new Date().toISOString().split('T')[0];
+        const monthStr = todayStr.substring(0, 7);
+        
+        document.getElementById('lmp').max = todayStr;
+        document.getElementById('lmp-month').max = monthStr;
+
+        function setMode(mode) {
+            inputMode = mode;
+            const btnExact = document.getElementById('btn-exact');
+            const btnMonth = document.getElementById('btn-month');
+            const wrapExact = document.getElementById('wrapper-exact');
+            const wrapMonth = document.getElementById('wrapper-month');
+            
+            hideError();
+
+            if (mode === 'exact') {
+                btnExact.className = "flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-slate-800 transition-all";
+                btnMonth.className = "flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-700 transition-all";
+                wrapExact.classList.remove('hidden');
+                wrapExact.classList.add('block');
+                wrapMonth.classList.add('hidden');
+                wrapMonth.classList.remove('block');
+            } else {
+                btnMonth.className = "flex-1 py-2 text-center rounded-lg bg-white shadow-sm text-slate-800 transition-all";
+                btnExact.className = "flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-700 transition-all";
+                wrapMonth.classList.remove('hidden');
+                wrapMonth.classList.add('block');
+                wrapExact.classList.add('hidden');
+                wrapExact.classList.remove('block');
+            }
+            
+            calculateEDD(); // Recalculate if mode switches and inputs exist
+        }
+
+        function calculateEDD() {
+            hideError();
+            const cycleValue = parseInt(document.getElementById('cycle').value) || 28;
+            const approxWarning = document.getElementById('approx-warning');
+            
+            let lmpDate;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Fetch Date based on mode
+            if (inputMode === 'exact') {
+                const lmpValue = document.getElementById('lmp').value;
+                if (!lmpValue) return showEmptyState();
+                
+                const [year, month, day] = lmpValue.split('-');
+                lmpDate = new Date(year, month - 1, day);
+                approxWarning.classList.add('hidden');
+            } else {
+                const monthValue = document.getElementById('lmp-month').value;
+                if (!monthValue) return showEmptyState();
+                
+                const [year, month] = monthValue.split('-');
+                
+                let assumedDay = 15;
+                if (parseInt(year) === today.getFullYear() && parseInt(month) - 1 === today.getMonth()) {
+                    assumedDay = Math.min(15, today.getDate());
+                }
+
+                lmpDate = new Date(year, month - 1, assumedDay);
+                approxWarning.classList.remove('hidden');
+            }
+
+            // Validation
+            if (lmpDate > today) {
+                showError("LMP date cannot be in the future.");
+                return showEmptyState();
+            }
+
+            // Calculations
+            const cycleAdjustment = cycleValue - 28;
+            const totalDaysToAdd = 280 + cycleAdjustment;
+
+            const eddDate = new Date(lmpDate);
+            eddDate.setDate(eddDate.getDate() + totalDaysToAdd);
+
+            const diffTime = Math.abs(today - lmpDate);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            const pogWeeks = Math.floor(diffDays / 7);
+            const pogDaysRemaining = diffDays % 7;
+
+            // Trimester
+            let trimester = "";
+            let trimesterDesc = "";
+            
+            if (pogWeeks < 13 || (pogWeeks === 13 && pogDaysRemaining === 0)) {
+                trimester = "First";
+                trimesterDesc = "0 - 13 Weeks";
+            } else if (pogWeeks < 27 || (pogWeeks === 27 && pogDaysRemaining === 0)) {
+                trimester = "Second";
+                trimesterDesc = "14 - 27 Weeks";
+            } else if (pogWeeks <= 42) {
+                trimester = "Third";
+                trimesterDesc = "28+ Weeks";
+            } else {
+                trimester = "Post-term";
+                trimesterDesc = "> 42 Weeks";
+            }
+
+            // Populate UI
+            const options = { day: '2-digit', month: 'short', year: 'numeric' };
+            document.getElementById('res-edd').textContent = eddDate.toLocaleDateString('en-IN', options);
+            
+            if (diffDays > totalDaysToAdd + 14) {
+                 document.getElementById('res-pog').textContent = "Post-dates";
+                 document.getElementById('res-pog').className = "text-xl font-bold text-red-500 leading-tight";
+            } else {
+                document.getElementById('res-pog').textContent = `${pogWeeks}w ${pogDaysRemaining}d`;
+                document.getElementById('res-pog').className = "text-xl font-bold text-slate-800 leading-tight";
+            }
+            
+            document.getElementById('res-trimester').textContent = trimester;
+            document.getElementById('res-trimester-desc').textContent = trimesterDesc;
+            document.getElementById('res-cycle-len').textContent = cycleValue;
+
+            showResultsState();
+        }
+
+        function showEmptyState() {
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+        }
+
+        function showResultsState() {
+            document.getElementById('empty-state').classList.add('hidden');
+            const resultState = document.getElementById('result-state');
+            resultState.classList.remove('hidden');
+            
+            // Re-trigger animation
+            resultState.classList.remove('fade-in');
+            void resultState.offsetWidth;
+            resultState.classList.add('fade-in');
+        }
+
+        function showError(msg) {
+            const errorMsgContainer = document.getElementById('error-msg');
+            document.getElementById('error-text').textContent = msg;
+            errorMsgContainer.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+
+```
